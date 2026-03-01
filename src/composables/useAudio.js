@@ -5,6 +5,17 @@ export function useAudio() {
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)()
     }
+    if (audioCtx.state === 'suspended') {
+      audioCtx.resume()
+    }
+
+    // Play a silent buffer to unlock audio on iOS
+    const buffer = audioCtx.createBuffer(1, 1, 22050)
+    const source = audioCtx.createBufferSource()
+    source.buffer = buffer
+    source.connect(audioCtx.destination)
+    source.start()
+
     return audioCtx
   }
 

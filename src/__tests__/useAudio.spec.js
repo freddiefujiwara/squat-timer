@@ -28,6 +28,12 @@ describe('useAudio', () => {
     mockAudioContext = {
       createOscillator: vi.fn(() => mockOscillator),
       createGain: vi.fn(() => mockGainNode),
+      createBuffer: vi.fn(() => ({})),
+      createBufferSource: vi.fn(() => ({
+        buffer: null,
+        connect: vi.fn(),
+        start: vi.fn()
+      })),
       destination: {},
       currentTime: 0,
       state: 'suspended',
@@ -77,6 +83,7 @@ describe('useAudio', () => {
 
   it('should play beep when audio context is already running', () => {
     mockAudioContext.state = 'running'
+    mockAudioContext.resume.mockClear()
     const TestComponent = defineComponent({
       setup() {
         return useAudio()
