@@ -28,11 +28,11 @@ export function useSquatCounter(options = {}) {
     const motionValue = filteredMotion
 
     if (!isSquatting.value) {
-      if (motionValue < -SQUAT_THRESHOLD) {
+      if (motionValue > SQUAT_THRESHOLD) {
         isSquatting.value = true
       }
     } else {
-      if (motionValue > SQUAT_THRESHOLD) {
+      if (motionValue < -SQUAT_THRESHOLD) {
         const now = Date.now()
         if (now - lastCountTime.value > CHATTERING_DELAY) {
           count.value++

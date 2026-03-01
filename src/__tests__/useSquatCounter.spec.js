@@ -28,18 +28,18 @@ describe('useSquatCounter', () => {
 
     const handler = mockAddEventListener.mock.calls.find(call => call[0] === 'devicemotion')[1]
 
-    // Simulate squatting down
+    // Simulate squatting down (stopping at bottom -> positive acceleration)
     for(let i=0; i<20; i++) {
         handler({
-            accelerationIncludingGravity: { x: 0, y: 0, z: 5 }
+            accelerationIncludingGravity: { x: 0, y: 0, z: 15 }
         })
     }
     expect(counter.isSquatting.value).toBe(true)
 
-    // Simulate standing up
+    // Simulate standing up (stopping at top -> negative acceleration)
     for(let i=0; i<20; i++) {
         handler({
-            accelerationIncludingGravity: { x: 0, y: 0, z: 15 }
+            accelerationIncludingGravity: { x: 0, y: 0, z: 5 }
         })
     }
     expect(counter.count.value).toBe(1)
@@ -58,20 +58,20 @@ describe('useSquatCounter', () => {
     const handler = mockAddEventListener.mock.calls.find(call => call[0] === 'devicemotion')[1]
 
     // First squat
-    for(let i=0; i<20; i++) handler({ accelerationIncludingGravity: { x: 0, y: 0, z: 5 } })
     for(let i=0; i<20; i++) handler({ accelerationIncludingGravity: { x: 0, y: 0, z: 15 } })
+    for(let i=0; i<20; i++) handler({ accelerationIncludingGravity: { x: 0, y: 0, z: 5 } })
     expect(counter.count.value).toBe(1)
 
     // Immediate second squat
-    for(let i=0; i<20; i++) handler({ accelerationIncludingGravity: { x: 0, y: 0, z: 5 } })
     for(let i=0; i<20; i++) handler({ accelerationIncludingGravity: { x: 0, y: 0, z: 15 } })
+    for(let i=0; i<20; i++) handler({ accelerationIncludingGravity: { x: 0, y: 0, z: 5 } })
     expect(counter.count.value).toBe(1)
 
     vi.setSystemTime(Date.now() + 1100)
 
     // After delay
-    for(let i=0; i<20; i++) handler({ accelerationIncludingGravity: { x: 0, y: 0, z: 5 } })
     for(let i=0; i<20; i++) handler({ accelerationIncludingGravity: { x: 0, y: 0, z: 15 } })
+    for(let i=0; i<20; i++) handler({ accelerationIncludingGravity: { x: 0, y: 0, z: 5 } })
     expect(counter.count.value).toBe(2)
   })
 
@@ -105,8 +105,8 @@ describe('useSquatCounter', () => {
     await counter.start()
     const handler = mockAddEventListener.mock.calls.find(call => call[0] === 'devicemotion')[1]
 
-    for(let i=0; i<20; i++) handler({ accelerationIncludingGravity: { x: 0, y: 0, z: 5 } })
     for(let i=0; i<20; i++) handler({ accelerationIncludingGravity: { x: 0, y: 0, z: 15 } })
+    for(let i=0; i<20; i++) handler({ accelerationIncludingGravity: { x: 0, y: 0, z: 5 } })
     expect(counter.count.value).toBe(1)
 
     counter.reset()
