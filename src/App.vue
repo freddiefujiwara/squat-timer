@@ -30,7 +30,7 @@ const { count, isSquatting, start, stop, reset } = useSquatCounter({
 const startMeasurement = async () => {
   try {
     error.value = ''
-    initAudio()
+    await initAudio()
     await start()
     startTimer()
   } catch (e) {

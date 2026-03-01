@@ -48,6 +48,8 @@ describe('App.vue full tests', () => {
   it('should call startMeasurement on start event', async () => {
     const wrapper = mount(App)
     await wrapper.findComponent({ name: 'ControlPanel' }).vm.$emit('start')
+    // Wait for async startMeasurement to complete
+    await new Promise(resolve => setTimeout(resolve, 0))
     expect(mockAudio.initAudio).toHaveBeenCalled()
     expect(mockSquatCounter.start).toHaveBeenCalled()
     expect(mockTimer.startTimer).toHaveBeenCalled()

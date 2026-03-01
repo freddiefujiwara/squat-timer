@@ -62,7 +62,7 @@ describe('useAudio', () => {
       template: '<div></div>'
     })
     const wrapper = mount(TestComponent)
-    const ctx = wrapper.vm.initAudio()
+    const ctx = await wrapper.vm.initAudio()
     expect(ctx).toBe(mockAudioContext)
   })
 
@@ -76,7 +76,7 @@ describe('useAudio', () => {
     })
     const wrapper = mount(TestComponent)
     // mockAudioContext.state is 'suspended' by default in beforeEach
-    wrapper.vm.initAudio()
+    await wrapper.vm.initAudio()
 
     // Reset state to running so playBeep proceeds
     mockAudioContext.state = 'running'
@@ -105,7 +105,7 @@ describe('useAudio', () => {
       template: '<div></div>'
     })
     const wrapper = mount(TestComponent)
-    wrapper.vm.initAudio() // Initialize first
+    await wrapper.vm.initAudio() // Initialize first
     wrapper.vm.playBeep()
 
     expect(mockOscillator.start).toHaveBeenCalled()
@@ -120,9 +120,9 @@ describe('useAudio', () => {
       template: '<div></div>'
     })
     const wrapper = mount(TestComponent)
-    wrapper.vm.initAudio()
-    const ctx1 = wrapper.vm.initAudio()
-    const ctx2 = wrapper.vm.initAudio()
+    await wrapper.vm.initAudio()
+    const ctx1 = await wrapper.vm.initAudio()
+    const ctx2 = await wrapper.vm.initAudio()
 
     expect(ctx1).toBe(ctx2)
   })
