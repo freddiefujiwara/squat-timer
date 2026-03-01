@@ -56,7 +56,7 @@ const resetAll = () => {
 
 <template>
   <div class="container" :class="{ 'squatting-bg': isSquatting }">
-    <h1>スクワットカウンター</h1>
+    <h1>スクワットタイマー</h1>
 
     <TimerDisplay :time-left="timeLeft" />
     <CounterDisplay :count="count" />

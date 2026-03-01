@@ -42,7 +42,7 @@ describe('App.vue full tests', () => {
 
   it('should render the app title', () => {
     const wrapper = mount(App)
-    expect(wrapper.find('h1').text()).toBe('スクワットカウンター')
+    expect(wrapper.find('h1').text()).toBe('スクワットタイマー')
   })
 
   it('should call startMeasurement on start event', async () => {
