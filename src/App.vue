@@ -18,7 +18,7 @@ const showModal = ref(false)
 const finalCount = ref(0)
 
 const handleTimeUp = () => {
-  stopMeasurement()
+  stopMeasurement(true)
 }
 
 const { timeLeft, isRunning, startTimer, stopTimer, resetTimer } = useTimer(60, handleTimeUp)
@@ -37,16 +37,17 @@ const startMeasurement = async () => {
   }
 }
 
-const stopMeasurement = () => {
+const stopMeasurement = (showResult = false) => {
   stop()
   stopTimer()
-  if (count.value > 0) {
+  if (showResult && count.value > 0) {
     finalCount.value = count.value
     showModal.value = true
   }
 }
 
 const resetAll = () => {
+  stop()
   reset()
   resetTimer()
   error.value = ''
@@ -64,7 +65,7 @@ const resetAll = () => {
     <ControlPanel
       :is-running="isRunning"
       @start="startMeasurement"
-      @stop="stopMeasurement"
+      @stop="stopMeasurement(false)"
       @reset="resetAll"
     />
 

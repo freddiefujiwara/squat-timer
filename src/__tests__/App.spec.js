@@ -64,21 +64,21 @@ describe('App.vue full tests', () => {
     expect(wrapper.text()).toContain('センサーの許可が必要です: Permission denied')
   })
 
-  it('should call stopMeasurement on stop event', async () => {
+  it('should call stopMeasurement on stop event and NOT show ResultModal', async () => {
     const wrapper = mount(App)
     mockSquatCounter.count.value = 10
     await wrapper.findComponent({ name: 'ControlPanel' }).vm.$emit('stop')
     expect(mockSquatCounter.stop).toHaveBeenCalled()
     expect(mockTimer.stopTimer).toHaveBeenCalled()
 
-    // ResultModal should be shown
-    expect(wrapper.findComponent({ name: 'ResultModal' }).props('show')).toBe(true)
-    expect(wrapper.findComponent({ name: 'ResultModal' }).props('count')).toBe(10)
+    // ResultModal should NOT be shown
+    expect(wrapper.findComponent({ name: 'ResultModal' }).props('show')).toBe(false)
   })
 
   it('should call resetAll on reset event', async () => {
     const wrapper = mount(App)
     await wrapper.findComponent({ name: 'ControlPanel' }).vm.$emit('reset')
+    expect(mockSquatCounter.stop).toHaveBeenCalled()
     expect(mockSquatCounter.reset).toHaveBeenCalled()
     expect(mockTimer.resetTimer).toHaveBeenCalled()
   })
