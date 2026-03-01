@@ -3,23 +3,22 @@ import { ref } from 'vue'
 import { useSquatCounter } from './composables/useSquatCounter'
 import { useTimer } from './composables/useTimer'
 import { useAudio } from './composables/useAudio'
-import { useRecords } from './composables/useRecords'
 
 import CounterDisplay from './components/CounterDisplay.vue'
 import TimerDisplay from './components/TimerDisplay.vue'
 import StatusFeedback from './components/StatusFeedback.vue'
 import ControlPanel from './components/ControlPanel.vue'
-import RecordList from './components/RecordList.vue'
 import ErrorMessage from './components/ErrorMessage.vue'
+import ResultModal from './components/ResultModal.vue'
 
 const { playBeep, initAudio } = useAudio()
-const { records, saveRecord } = useRecords()
 
 const error = ref('')
+const showModal = ref(false)
+const finalCount = ref(0)
 
 const handleTimeUp = () => {
   stopMeasurement()
-  saveRecord(count.value)
 }
 
 const { timeLeft, isRunning, startTimer, stopTimer, resetTimer } = useTimer(60, handleTimeUp)
@@ -42,6 +41,10 @@ const startMeasurement = async () => {
 const stopMeasurement = () => {
   stop()
   stopTimer()
+  if (count.value > 0) {
+    finalCount.value = count.value
+    showModal.value = true
+  }
 }
 
 const resetAll = () => {
@@ -67,7 +70,12 @@ const resetAll = () => {
     />
 
     <ErrorMessage :error="error" />
-    <RecordList :records="records" />
+
+    <ResultModal
+      :show="showModal"
+      :count="finalCount"
+      @close="showModal = false"
+    />
   </div>
 </template>
 

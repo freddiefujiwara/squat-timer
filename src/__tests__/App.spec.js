@@ -6,13 +6,11 @@ import { ref } from 'vue'
 import * as useSquatCounterModule from '../composables/useSquatCounter'
 import * as useTimerModule from '../composables/useTimer'
 import * as useAudioModule from '../composables/useAudio'
-import * as useRecordsModule from '../composables/useRecords'
 
 describe('App.vue full tests', () => {
   let mockSquatCounter
   let mockTimer
   let mockAudio
-  let mockRecords
 
   beforeEach(() => {
     vi.restoreAllMocks()
@@ -40,12 +38,6 @@ describe('App.vue full tests', () => {
       initAudio: vi.fn()
     }
     vi.spyOn(useAudioModule, 'useAudio').mockReturnValue(mockAudio)
-
-    mockRecords = {
-      records: ref([]),
-      saveRecord: vi.fn()
-    }
-    vi.spyOn(useRecordsModule, 'useRecords').mockReturnValue(mockRecords)
   })
 
   it('should render the app title', () => {
@@ -72,9 +64,14 @@ describe('App.vue full tests', () => {
 
   it('should call stopMeasurement on stop event', async () => {
     const wrapper = mount(App)
+    mockSquatCounter.count.value = 10
     await wrapper.findComponent({ name: 'ControlPanel' }).vm.$emit('stop')
     expect(mockSquatCounter.stop).toHaveBeenCalled()
     expect(mockTimer.stopTimer).toHaveBeenCalled()
+
+    // ResultModal should be shown
+    expect(wrapper.findComponent({ name: 'ResultModal' }).props('show')).toBe(true)
+    expect(wrapper.findComponent({ name: 'ResultModal' }).props('count')).toBe(10)
   })
 
   it('should call resetAll on reset event', async () => {
@@ -91,12 +88,16 @@ describe('App.vue full tests', () => {
     expect(mockAudio.playBeep).toHaveBeenCalled()
   })
 
-  it('should handle timer expiration', () => {
-    mount(App)
+  it('should handle timer expiration', async () => {
+    const wrapper = mount(App)
     const onTimeUpCallback = useTimerModule.useTimer.mock.calls[0][1]
     mockSquatCounter.count.value = 15
     onTimeUpCallback()
     expect(mockSquatCounter.stop).toHaveBeenCalled()
-    expect(mockRecords.saveRecord).toHaveBeenCalledWith(15)
+
+    // ResultModal should be shown
+    await wrapper.vm.$nextTick()
+    expect(wrapper.findComponent({ name: 'ResultModal' }).props('show')).toBe(true)
+    expect(wrapper.findComponent({ name: 'ResultModal' }).props('count')).toBe(15)
   })
 })
