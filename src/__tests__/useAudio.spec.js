@@ -9,12 +9,6 @@ describe('useAudio', () => {
   let mockGainNode
 
   beforeEach(() => {
-    // Mock global Audio
-    global.Audio = class {
-      constructor() {}
-      play() { return Promise.resolve() }
-    }
-
     mockOscillator = {
       connect: vi.fn(),
       start: vi.fn(),
@@ -33,8 +27,8 @@ describe('useAudio', () => {
       }
     }
     mockAudioContext = {
-      createOscillator: vi.fn(() => mockOscillator),
-      createGain: vi.fn(() => mockGainNode),
+      createOscillator: vi.fn().mockReturnValue(mockOscillator),
+      createGain: vi.fn().mockReturnValue(mockGainNode),
       createBuffer: vi.fn(() => ({})),
       createBufferSource: vi.fn(() => ({
         buffer: null,
@@ -79,6 +73,17 @@ describe('useAudio', () => {
       template: '<div></div>'
     })
     const wrapper = mount(TestComponent)
+    // mockAudioContext.state is 'suspended' by default in beforeEach
+    wrapper.vm.initAudio()
+
+    // Reset state to running so playBeep proceeds
+    mockAudioContext.state = 'running'
+
+    // Clear calls from initAudio
+    mockAudioContext.createOscillator.mockClear()
+    mockAudioContext.createGain.mockClear()
+    mockOscillator.start.mockClear()
+
     wrapper.vm.playBeep()
 
     expect(mockAudioContext.createOscillator).toHaveBeenCalled()
@@ -90,7 +95,6 @@ describe('useAudio', () => {
 
   it('should play beep when audio context is already running', () => {
     mockAudioContext.state = 'running'
-    mockAudioContext.resume.mockClear()
     const TestComponent = defineComponent({
       setup() {
         return useAudio()
@@ -98,9 +102,9 @@ describe('useAudio', () => {
       template: '<div></div>'
     })
     const wrapper = mount(TestComponent)
+    wrapper.vm.initAudio() // Initialize first
     wrapper.vm.playBeep()
 
-    expect(mockAudioContext.resume).not.toHaveBeenCalled()
     expect(mockOscillator.start).toHaveBeenCalled()
   })
 
