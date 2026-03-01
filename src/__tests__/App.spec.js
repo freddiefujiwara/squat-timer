@@ -55,13 +55,24 @@ describe('App.vue full tests', () => {
     expect(mockTimer.startTimer).toHaveBeenCalled()
   })
 
-  it('should handle start error', async () => {
+  it('should handle start error (generic)', async () => {
+    mockSquatCounter.start.mockRejectedValue(new Error('Some error'))
+    const wrapper = mount(App)
+    // Wait for internal promises in startMeasurement
+    await wrapper.findComponent({ name: 'ControlPanel' }).vm.$emit('start')
+    await new Promise(resolve => setTimeout(resolve, 0))
+    expect(wrapper.findComponent({ name: 'ErrorMessage' }).props('error')).toContain('センサーの許可が必要です: Some error')
+    expect(wrapper.findComponent({ name: 'ErrorMessage' }).props('isPermissionDenied')).toBe(false)
+  })
+
+  it('should handle permission denied error specifically', async () => {
     mockSquatCounter.start.mockRejectedValue(new Error('Permission denied'))
     const wrapper = mount(App)
     // Wait for internal promises in startMeasurement
     await wrapper.findComponent({ name: 'ControlPanel' }).vm.$emit('start')
     await new Promise(resolve => setTimeout(resolve, 0))
-    expect(wrapper.text()).toContain('センサーの許可が必要です: Permission denied')
+    expect(wrapper.findComponent({ name: 'ErrorMessage' }).props('error')).toContain('センサーの利用が拒否されました')
+    expect(wrapper.findComponent({ name: 'ErrorMessage' }).props('isPermissionDenied')).toBe(true)
   })
 
   it('should call stopMeasurement on stop event', async () => {

@@ -89,6 +89,14 @@ describe('useSquatCounter', () => {
       requestPermission: vi.fn().mockResolvedValue('denied')
     }
     const counter = useSquatCounter()
+    await expect(counter.start()).rejects.toThrow('Permission denied')
+  })
+
+  it('should handle other non-granted permission states', async () => {
+    global.DeviceMotionEvent = {
+      requestPermission: vi.fn().mockResolvedValue('default')
+    }
+    const counter = useSquatCounter()
     await expect(counter.start()).rejects.toThrow('Permission not granted')
   })
 

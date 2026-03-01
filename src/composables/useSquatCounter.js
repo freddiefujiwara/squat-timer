@@ -47,7 +47,9 @@ export function useSquatCounter(options = {}) {
   const start = async () => {
     if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
       const permission = await DeviceMotionEvent.requestPermission()
-      if (permission !== 'granted') {
+      if (permission === 'denied') {
+        throw new Error('Permission denied')
+      } else if (permission !== 'granted') {
         throw new Error('Permission not granted')
       }
     }

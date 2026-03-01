@@ -14,6 +14,7 @@ import ResultModal from './components/ResultModal.vue'
 const { playBeep, initAudio } = useAudio()
 
 const error = ref('')
+const isPermissionDenied = ref(false)
 const showModal = ref(false)
 const finalCount = ref(0)
 
@@ -30,11 +31,17 @@ const { count, isSquatting, start, stop, reset } = useSquatCounter({
 const startMeasurement = async () => {
   try {
     error.value = ''
+    isPermissionDenied.value = false
     await initAudio()
     await start()
     startTimer()
   } catch (e) {
-    error.value = 'センサーの許可が必要です: ' + e.message
+    if (e.message === 'Permission denied') {
+      error.value = 'センサーの利用が拒否されました。もう一度許可するには、ページを再読み込みしてください。'
+      isPermissionDenied.value = true
+    } else {
+      error.value = 'センサーの許可が必要です: ' + e.message
+    }
   }
 }
 
@@ -51,6 +58,7 @@ const resetAll = () => {
   reset()
   resetTimer()
   error.value = ''
+  isPermissionDenied.value = false
 }
 </script>
 
@@ -69,7 +77,7 @@ const resetAll = () => {
       @reset="resetAll"
     />
 
-    <ErrorMessage :error="error" />
+    <ErrorMessage :error="error" :is-permission-denied="isPermissionDenied" />
 
     <ResultModal
       :show="showModal"
