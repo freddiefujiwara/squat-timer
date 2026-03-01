@@ -1,6 +1,7 @@
-import { ref, onUnmounted, getCurrentInstance } from 'vue'
+import { ref, onUnmounted, getCurrentInstance, readonly } from 'vue'
 
-export function useSquatCounter() {
+export function useSquatCounter(options = {}) {
+  const { onCount } = options
   const count = ref(0)
   const isSquatting = ref(false)
   const lastCountTime = ref(0)
@@ -12,8 +13,6 @@ export function useSquatCounter() {
   // Thresholds
   const SQUAT_THRESHOLD = 1.5 // m/s^2 deviation from gravity
   const CHATTERING_DELAY = 1000 // 1 second
-
-  const onCount = ref(null)
 
   const handleMotion = (event) => {
     const acc = event.accelerationIncludingGravity
@@ -38,7 +37,7 @@ export function useSquatCounter() {
         if (now - lastCountTime.value > CHATTERING_DELAY) {
           count.value++
           lastCountTime.value = now
-          if (onCount.value) onCount.value()
+          if (onCount) onCount(count.value)
         }
         isSquatting.value = false
       }
@@ -73,11 +72,10 @@ export function useSquatCounter() {
   }
 
   return {
-    count,
-    isSquatting,
+    count: readonly(count),
+    isSquatting: readonly(isSquatting),
     start,
     stop,
-    reset,
-    onCount
+    reset
   }
 }
