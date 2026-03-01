@@ -30,8 +30,7 @@ const { count, isSquatting, start, stop, reset } = useSquatCounter({
 const startMeasurement = async () => {
   try {
     error.value = ''
-    await initAudio()
-    await start()
+    await Promise.all([initAudio(), start()])
     startTimer()
   } catch (e) {
     error.value = 'センサーの許可が必要です: ' + e.message
