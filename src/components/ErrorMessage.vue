@@ -21,7 +21,7 @@ const reloadPage = () => {
       {{ error }}
     </div>
     <button v-if="isPermissionDenied" @click="reloadPage" class="btn-reload">
-      再読み込みして許可する
+      再読み込みしてやり直す
     </button>
   </div>
 </template>

@@ -37,7 +37,7 @@ const startMeasurement = async () => {
     startTimer()
   } catch (e) {
     if (e.message === 'Permission denied') {
-      error.value = 'センサーの利用が拒否されました。もう一度許可するには、ページを再読み込みしてください。'
+      error.value = 'センサーの利用が拒否されました。再度許可するには、ページを再読み込みして、もう一度「計測開始」ボタンを押してください。'
       isPermissionDenied.value = true
     } else {
       error.value = 'センサーの許可が必要です: ' + e.message

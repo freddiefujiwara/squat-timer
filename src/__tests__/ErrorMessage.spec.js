@@ -23,7 +23,7 @@ describe('ErrorMessage', () => {
       props: { error: 'Test error', isPermissionDenied: true }
     })
     expect(wrapper.find('.btn-reload').exists()).toBe(true)
-    expect(wrapper.find('.btn-reload').text()).toBe('再読み込みして許可する')
+    expect(wrapper.find('.btn-reload').text()).toBe('再読み込みしてやり直す')
   })
 
   it('should not show reload button when isPermissionDenied is false', () => {

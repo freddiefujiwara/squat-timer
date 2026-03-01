@@ -71,7 +71,7 @@ describe('App.vue full tests', () => {
     // Wait for internal promises in startMeasurement
     await wrapper.findComponent({ name: 'ControlPanel' }).vm.$emit('start')
     await new Promise(resolve => setTimeout(resolve, 0))
-    expect(wrapper.findComponent({ name: 'ErrorMessage' }).props('error')).toContain('センサーの利用が拒否されました')
+    expect(wrapper.findComponent({ name: 'ErrorMessage' }).props('error')).toContain('再度許可するには、ページを再読み込みして、もう一度「計測開始」ボタンを押してください')
     expect(wrapper.findComponent({ name: 'ErrorMessage' }).props('isPermissionDenied')).toBe(true)
   })
 
