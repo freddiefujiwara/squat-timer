@@ -1,0 +1,35 @@
+name: Node.js CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - run: npm install
+    - run: npm test -- --run
+    - run: npm run build
+    - name: Generate OGP Image from GAS JSON
+      run: |
+        # URL-encoded title: スクワットカウンター
+        JSON_RESPONSE=$(curl -L -s "https://script.google.com/macros/s/AKfycbzbMAKxkzHlwN8SY7ygJA34xYESMNNdkGNt8vv1XMcZSksgHsUwOxCCdP-wgg6fv7M/exec?t=%E3%82%B9%E3%82%AF%E3%83%AF%E3%83%83%E3%83%88%E3%82%AB%E3%82%A6%E3%83%B3%E3%82%BF%E3%83%BC")
+        echo $JSON_RESPONSE | jq -r '.png' | base64 -d > ./dist/ogp.png
+        ls -lh ./dist/ogp.png
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./dist
