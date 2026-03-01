@@ -1,7 +1,7 @@
-export function useAudio() {
-  // インスタンスをクロージャの外、またはシングルトンとして保持
-  let audioCtx = null
+// インスタンスをクロージャの外、またはシングルトンとして保持
+let audioCtx = null
 
+export function useAudio() {
   const initAudio = () => {
     if (!audioCtx) {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)()

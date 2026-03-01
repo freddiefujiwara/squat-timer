@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useAudio } from '../composables/useAudio'
 import { mount } from '@vue/test-utils'
 import { defineComponent } from 'vue'
 
@@ -8,7 +7,8 @@ describe('useAudio', () => {
   let mockOscillator
   let mockGainNode
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    vi.resetModules()
     mockOscillator = {
       connect: vi.fn(),
       start: vi.fn(),
@@ -48,7 +48,8 @@ describe('useAudio', () => {
     global.window.webkitAudioContext = undefined
   })
 
-  it('should use webkitAudioContext if AudioContext is not available', () => {
+  it('should use webkitAudioContext if AudioContext is not available', async () => {
+    const { useAudio } = await import('../composables/useAudio')
     global.window.AudioContext = undefined
     global.window.webkitAudioContext = class {
         constructor() { return mockAudioContext }
@@ -65,7 +66,8 @@ describe('useAudio', () => {
     expect(ctx).toBe(mockAudioContext)
   })
 
-  it('should initialize and play beep', () => {
+  it('should initialize and play beep', async () => {
+    const { useAudio } = await import('../composables/useAudio')
     const TestComponent = defineComponent({
       setup() {
         return useAudio()
@@ -93,7 +95,8 @@ describe('useAudio', () => {
     expect(mockAudioContext.resume).toHaveBeenCalled()
   })
 
-  it('should play beep when audio context is already running', () => {
+  it('should play beep when audio context is already running', async () => {
+    const { useAudio } = await import('../composables/useAudio')
     mockAudioContext.state = 'running'
     const TestComponent = defineComponent({
       setup() {
@@ -108,7 +111,8 @@ describe('useAudio', () => {
     expect(mockOscillator.start).toHaveBeenCalled()
   })
 
-  it('should only create AudioContext once', () => {
+  it('should only create AudioContext once', async () => {
+    const { useAudio } = await import('../composables/useAudio')
     const TestComponent = defineComponent({
       setup() {
         return useAudio()
