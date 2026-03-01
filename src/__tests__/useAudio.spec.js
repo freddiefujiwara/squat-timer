@@ -9,6 +9,12 @@ describe('useAudio', () => {
   let mockGainNode
 
   beforeEach(() => {
+    // Mock global Audio
+    global.Audio = class {
+      constructor() {}
+      play() { return Promise.resolve() }
+    }
+
     mockOscillator = {
       connect: vi.fn(),
       start: vi.fn(),
@@ -22,6 +28,7 @@ describe('useAudio', () => {
       connect: vi.fn(),
       gain: {
         setValueAtTime: vi.fn(),
+        linearRampToValueAtTime: vi.fn(),
         exponentialRampToValueAtTime: vi.fn()
       }
     }
