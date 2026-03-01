@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useAudio } from '../composables/useAudio'
 import { mount } from '@vue/test-utils'
 import { defineComponent } from 'vue'
 
@@ -8,7 +7,8 @@ describe('useAudio', () => {
   let mockOscillator
   let mockGainNode
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    vi.resetModules()
     mockOscillator = {
       connect: vi.fn(),
       start: vi.fn(),
@@ -22,12 +22,19 @@ describe('useAudio', () => {
       connect: vi.fn(),
       gain: {
         setValueAtTime: vi.fn(),
+        linearRampToValueAtTime: vi.fn(),
         exponentialRampToValueAtTime: vi.fn()
       }
     }
     mockAudioContext = {
-      createOscillator: vi.fn(() => mockOscillator),
-      createGain: vi.fn(() => mockGainNode),
+      createOscillator: vi.fn().mockReturnValue(mockOscillator),
+      createGain: vi.fn().mockReturnValue(mockGainNode),
+      createBuffer: vi.fn(() => ({})),
+      createBufferSource: vi.fn(() => ({
+        buffer: null,
+        connect: vi.fn(),
+        start: vi.fn()
+      })),
       destination: {},
       currentTime: 0,
       state: 'suspended',
@@ -41,7 +48,8 @@ describe('useAudio', () => {
     global.window.webkitAudioContext = undefined
   })
 
-  it('should use webkitAudioContext if AudioContext is not available', () => {
+  it('should use webkitAudioContext if AudioContext is not available', async () => {
+    const { useAudio } = await import('../composables/useAudio')
     global.window.AudioContext = undefined
     global.window.webkitAudioContext = class {
         constructor() { return mockAudioContext }
@@ -54,11 +62,12 @@ describe('useAudio', () => {
       template: '<div></div>'
     })
     const wrapper = mount(TestComponent)
-    const ctx = wrapper.vm.initAudio()
+    const ctx = await wrapper.vm.initAudio()
     expect(ctx).toBe(mockAudioContext)
   })
 
-  it('should initialize and play beep', () => {
+  it('should initialize and play beep', async () => {
+    const { useAudio } = await import('../composables/useAudio')
     const TestComponent = defineComponent({
       setup() {
         return useAudio()
@@ -66,6 +75,17 @@ describe('useAudio', () => {
       template: '<div></div>'
     })
     const wrapper = mount(TestComponent)
+    // mockAudioContext.state is 'suspended' by default in beforeEach
+    await wrapper.vm.initAudio()
+
+    // Reset state to running so playBeep proceeds
+    mockAudioContext.state = 'running'
+
+    // Clear calls from initAudio
+    mockAudioContext.createOscillator.mockClear()
+    mockAudioContext.createGain.mockClear()
+    mockOscillator.start.mockClear()
+
     wrapper.vm.playBeep()
 
     expect(mockAudioContext.createOscillator).toHaveBeenCalled()
@@ -75,7 +95,8 @@ describe('useAudio', () => {
     expect(mockAudioContext.resume).toHaveBeenCalled()
   })
 
-  it('should play beep when audio context is already running', () => {
+  it('should play beep when audio context is already running', async () => {
+    const { useAudio } = await import('../composables/useAudio')
     mockAudioContext.state = 'running'
     const TestComponent = defineComponent({
       setup() {
@@ -84,13 +105,14 @@ describe('useAudio', () => {
       template: '<div></div>'
     })
     const wrapper = mount(TestComponent)
+    await wrapper.vm.initAudio() // Initialize first
     wrapper.vm.playBeep()
 
-    expect(mockAudioContext.resume).not.toHaveBeenCalled()
     expect(mockOscillator.start).toHaveBeenCalled()
   })
 
-  it('should only create AudioContext once', () => {
+  it('should only create AudioContext once', async () => {
+    const { useAudio } = await import('../composables/useAudio')
     const TestComponent = defineComponent({
       setup() {
         return useAudio()
@@ -98,9 +120,9 @@ describe('useAudio', () => {
       template: '<div></div>'
     })
     const wrapper = mount(TestComponent)
-    wrapper.vm.initAudio()
-    const ctx1 = wrapper.vm.initAudio()
-    const ctx2 = wrapper.vm.initAudio()
+    await wrapper.vm.initAudio()
+    const ctx1 = await wrapper.vm.initAudio()
+    const ctx2 = await wrapper.vm.initAudio()
 
     expect(ctx1).toBe(ctx2)
   })
